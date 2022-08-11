@@ -1,0 +1,5 @@
+sceneSetups:
+- path: Assets/priority queue/priority queue.unity
+  isLoaded: 1
+  isActive: 1
+  isSubScene: 0
