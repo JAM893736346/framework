@@ -28,7 +28,7 @@ public class MMSequenceNote
     }
 }
 /// <summary>
-/// 轨道数据
+/// 轨道数据包括颜色，状态
 /// </summary>
 [System.Serializable]
 public class MMSequenceTrack
@@ -70,14 +70,14 @@ public class MMSequenceList
 public class Sequence : ScriptableObject
 {
    [Header("Sequence")]
-		/// the length (in seconds) of the sequence
+		/// 轨道的数量
 		[Tooltip("the length (in seconds) of the sequence")]
 		[MMFReadOnly]
 		public float Length;
-		/// the original sequence (as outputted by the input sequence recorder)
+		/// 轨道数据的列表长度
 		[Tooltip("the original sequence (as outputted by the input sequence recorder)")]
 		public MMSequenceList OriginalSequence;
-		/// the duration in seconds to apply after the last input
+		/// 每个时间间隔
 		[Tooltip("the duration in seconds to apply after the last input")]
 		public float EndSilenceDuration = 0f;
 
