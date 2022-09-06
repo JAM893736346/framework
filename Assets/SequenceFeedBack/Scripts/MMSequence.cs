@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using SequenceFeedBack;
 using UnityEngine;
 
 //序列可能存在的状态
@@ -67,46 +66,46 @@ public class MMSequenceList
 
 //序列的储存文件
 [CreateAssetMenu(menuName = "MoreMountains/Sequencer/MMSequence")]
-public class Sequence : ScriptableObject
+public class MMSequencer : ScriptableObject
 {
    [Header("Sequence")]
-		/// 轨道的数量
+		/// 每个轨道时长
 		[Tooltip("the length (in seconds) of the sequence")]
 		[MMFReadOnly]
 		public float Length;
-		/// 轨道数据的列表长度
+		/// 原始序列(由输入序列记录器输出)
 		[Tooltip("the original sequence (as outputted by the input sequence recorder)")]
 		public MMSequenceList OriginalSequence;
-		/// 每个时间间隔
+		/// 自动播放下一个时间间隔
 		[Tooltip("the duration in seconds to apply after the last input")]
 		public float EndSilenceDuration = 0f;
 
 		[Header("Sequence Contents")]
-		/// the list of tracks for this sequence
+		/// 轨道实体列表
 		[Tooltip("the list of tracks for this sequence")]
 		public List<MMSequenceTrack> SequenceTracks;
 
 		[Header("Quantizing")]
-		/// whether this sequence should be used in quantized form or not
+		/// 这个序列是否应该以量子化的形式使用
 		[Tooltip("whether this sequence should be used in quantized form or not")]
 		public bool Quantized;
-		/// the target BPM for this sequence
+		/// 序列流程
 		[Tooltip("the target BPM for this sequence")]
 		public int TargetBPM = 120;
-		/// the contents of the quantized sequence
+		/// 轨道数据的列表长度（列）经过后期输入的
 		[Tooltip("the contents of the quantized sequence")]
 		public List<MMSequenceList> QuantizedSequence;
-        
+        //定义随机按钮颜色
 		[Space]
 		[Header("Controls")]
 		[MMFInspectorButton("RandomizeTrackColors")]
 		public bool RandomizeTrackColorsButton;
-        
+        //中间变量
 		protected float[] _quantizedBeats; 
 		protected List<MMSequenceNote> _deleteList;
 
 		/// <summary>
-		/// Compares and sorts two sequence notes
+		/// 比较两个序列数据的大小
 		/// </summary>
 		/// <param name="p1"></param>
 		/// <param name="p2"></param>
@@ -117,7 +116,7 @@ public class Sequence : ScriptableObject
 		}
 
 		/// <summary>
-		/// Sorts the original sequence based on timestamps
+		/// 排序原始序列
 		/// </summary>
 		public virtual void SortOriginalSequence()
 		{
@@ -125,7 +124,7 @@ public class Sequence : ScriptableObject
 		}
 
 		/// <summary>
-		/// Quantizes the original sequence, filling the QuantizedSequence list, arranging events on the beat
+		/// 量化原始序列，填充QuantizedSequence列表，按节拍安排事件
 		/// </summary>
 		public virtual void QuantizeOriginalSequence()
 		{
@@ -134,7 +133,7 @@ public class Sequence : ScriptableObject
 		}
 
 		/// <summary>
-		/// Computes the length of the sequence
+		/// 获得序列的长度
 		/// </summary>
 		public virtual void ComputeLength()
 		{
@@ -142,12 +141,13 @@ public class Sequence : ScriptableObject
 		}
 
 		/// <summary>
-		/// Makes every timestamp in the sequence match the BPM track
+		/// 将 timestamp 映射和BMP关联
 		/// </summary>
 		public virtual void QuantizeSequenceToBPM(List<MMSequenceNote> baseSequence)
 		{
 			float sequenceLength = Length;
 			float beatDuration = 60f / TargetBPM;
+			//总时长/间隔
 			int numberOfBeatsInSequence = (int)(sequenceLength / beatDuration);
 			QuantizedSequence = new List<MMSequenceList>();
 			_deleteList = new List<MMSequenceNote>();
@@ -164,13 +164,14 @@ public class Sequence : ScriptableObject
 			{
 				QuantizedSequence.Add(new MMSequenceList());
 				QuantizedSequence[i].Line = new List<MMSequenceNote>();
+				//为每个轨道添加数据
 				for (int j = 0; j < numberOfBeatsInSequence; j++)
 				{
 					MMSequenceNote newNote = new MMSequenceNote();
 					newNote.ID = -1;
 					newNote.Timestamp = _quantizedBeats[j];
 					QuantizedSequence[i].Line.Add(newNote);
-
+					//将原始(OriginalSequence)录制好的序列合并进QuantizedSequence
 					foreach (MMSequenceNote note in baseSequence)
 					{
 						float newTimestamp = RoundFloatToArray(note.Timestamp, _quantizedBeats);
@@ -184,7 +185,7 @@ public class Sequence : ScriptableObject
 		}
 
 		/// <summary>
-		/// On validate, we initialize our track's properties
+		/// 初始化所有轨道数据
 		/// </summary>
 		protected virtual void OnValidate()
 		{
@@ -195,7 +196,7 @@ public class Sequence : ScriptableObject
 		}
 
 		/// <summary>
-		/// Randomizes track colors
+		/// 随机轨道颜色
 		/// </summary>
 		protected virtual void RandomizeTrackColors()
 		{
@@ -206,7 +207,7 @@ public class Sequence : ScriptableObject
 		}
 
 		/// <summary>
-		/// Returns a random color for the sequence tracks
+		/// 获得一个随机颜色
 		/// </summary>
 		/// <returns></returns>
 		public static Color RandomSequenceColor()
@@ -252,7 +253,7 @@ public class Sequence : ScriptableObject
 		}
         
 		/// <summary>
-		/// Rounds a float to the closest float in an array (array has to be sorted)
+		/// 将一个浮点数舍入到数组中最近的浮点数(数组必须被排序)
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="array"></param>
